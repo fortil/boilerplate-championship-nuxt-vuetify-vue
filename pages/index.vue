@@ -2,7 +2,7 @@
   <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
       <div class="text-xs-center">
-        <img src="/imaginamosOpenLogoOrgange.png" alt="Imaginamos Cali Open 2018" class="mb-5" style="max-width: 170px"/>
+        <img src="/imaginamosOpenLogoTransparent.png" alt="Imaginamos Cali Open 2018" class="mb-5" style="max-width: 170px"/>
       </div>
       <v-data-table
         :headers="headers"
@@ -18,6 +18,7 @@
           <td class="text-xs-right">{{ props.item.points }}</td>
           <td class="text-xs-right">{{ props.item.pointsLost }}</td>
           <td class="text-xs-right">{{ props.item.difPoints }}</td>
+          <td class="text-xs-right">{{ props.item.totalPoints }}</td>
         </template>
       </v-data-table>
     </v-flex>
@@ -44,7 +45,8 @@ export default {
         { text: 'PP', value: 'playsLost' },
         { text: 'PA', value: 'points' },
         { text: 'PE', value: 'pointsLost' },
-        { text: 'DP', value: 'difPoints' }
+        { text: 'DP', value: 'difPoints' },
+        { text: 'PT', value: 'totalPoints' }
       ]
     }
   }

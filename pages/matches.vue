@@ -1,41 +1,32 @@
 <template>
   <v-layout column justify-center align-center>
     <v-flex text-xs-center xs12 sm8 md6>
-      <v-card>
-        <v-list two-line subheader>
-          <v-subheader inset>To Do</v-subheader>
-          <v-list-tile avatar v-for="item in items" :key="item.key" @click="">
-            <v-list-tile-avatar>
-              <v-icon :class="[item.iconClass]">{{ item.icon }}</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-              <v-list-tile-sub-title>{{ item.subtitle }}</v-list-tile-sub-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-btn icon ripple @click.stop="setRecordFn(item)">
-                <v-icon color="grey lighten-1">info</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-          </v-list-tile>
-          <v-divider inset></v-divider>
-          <v-subheader inset>Done</v-subheader>
-          <v-list-tile v-for="item in items2" :key="item.key" avatar @click="">
-            <v-list-tile-avatar>
-              <v-icon :class="[item.iconClass]">{{ item.icon }}</v-icon>
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-              <v-list-tile-sub-title>{{ item.subtitle }}</v-list-tile-sub-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-btn icon ripple @click.stop="showInfoModal(item)">
-                <v-icon color="grey lighten-1">info</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-          </v-list-tile>
-        </v-list>
-      </v-card>
+      <v-tabs v-model="active" color="grey darken-1" dark slider-color="yellow" >
+        <v-tab v-for="n in keys" :key="n" ripple>
+          {{ n }}
+        </v-tab>
+        <v-tab-item v-for="n in keys" :key="n" >
+          <v-card>
+            <v-list two-line subheader>
+              <v-subheader inset>{{n}}</v-subheader>
+              <v-list-tile avatar v-for="item in items(n)" :key="item.key" @click="">
+                <v-list-tile-avatar>
+                  <v-icon :class="[item.iconClass]">{{ item.icon }}</v-icon>
+                </v-list-tile-avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+                  <v-list-tile-sub-title>{{ item.subtitle }}</v-list-tile-sub-title>
+                </v-list-tile-content>
+                <v-list-tile-action>
+                  <v-btn icon ripple @click.stop="setRecordFn(n, item)">
+                    <v-icon color="grey lighten-1">info</v-icon>
+                  </v-btn>
+                </v-list-tile-action>
+              </v-list-tile>
+            </v-list>
+          </v-card>
+        </v-tab-item>
+      </v-tabs>
       <v-dialog v-model="setRecordModal && user && user.isAllowed" max-width="500px" :persistent="true">
         <v-card>
           <v-card-title>
@@ -104,26 +95,53 @@ const toDate = (e) => e ? (new Date(e)).toLocaleString() : (new Date()).toLocale
 const getPoints = (e) => e ? `${e.pointsWinner} a ${e.pointsLosser}` : `0 a 0`
 export default {
   computed: {
-    ...mapGetters(['matchDone', 'matchTodo', 'user', 'players']),
-    items () {
-      return this.matchTodo ? this.matchTodo.map((e) => (
-        Object.assign({}, e, {icon: 'access_time'}, {iconClass: 'blue lighten-1 white--text'}, {subtitle: 'Not yet'})
-      )) : []
-    },
-    items2 () {
-      return this.matchDone ? this.matchDone.map((e) => (
-        Object.assign({}, e, {icon: 'done'}, {iconClass: 'green white--text'}, {subtitle: `${toDate(e.date)} - ${getPoints(e.points)}`})
-      )) : []
-    }
+    ...mapGetters(['matchDone', 'matchTodo', 'user', 'players'])
+    // items (act) {
+    //   if (act === 'Todo') {
+    //     return this.matchTodo ? this.matchTodo.map((e) => (
+    //       Object.assign({}, e, {icon: 'access_time'}, {iconClass: 'blue lighten-1 white--text'}, {subtitle: 'Not yet'})
+    //     )) : []
+    //   } else if (act === 'Done') {
+    //     return this.matchDone ? this.matchDone.map((e) => (
+    //       Object.assign({}, e, {icon: 'done'}, {iconClass: 'green white--text'}, {subtitle: `${toDate(e.date)} - ${getPoints(e.points)}`})
+    //     )) : []
+    //   }
+    //   return []
+    // },
+    // items2 () {
+    //   return this.matchDone ? this.matchDone.map((e) => (
+    //     Object.assign({}, e, {icon: 'done'}, {iconClass: 'green white--text'}, {subtitle: `${toDate(e.date)} - ${getPoints(e.points)}`})
+    //   )) : []
+    // }
   },
   methods: {
-    setRecordFn (item) {
-      console.log(item)
+    items (act) {
+      if (act === 'Todo') {
+        return this.matchTodo ? this.matchTodo.map((e) => (
+          Object.assign({}, e, {icon: 'access_time'}, {iconClass: 'blue lighten-1 white--text'}, {subtitle: 'Not yet'})
+        )) : []
+      } else if (act === 'Done') {
+        return this.matchDone ? this.matchDone.map((e) => (
+          Object.assign({}, e, {icon: 'done'}, {iconClass: 'green white--text'}, {subtitle: `${toDate(e.date)} - ${getPoints(e.points)}`})
+        )) : []
+      }
+      return []
+    },
+    setRecordFn (act, item) {
       const players = item.key.split('_*_').map((e) => this.players.filter(p => p.uid === e)[0])
-      this.player.player1 = Object.assign({}, this.players.player1, players[0], {points: 0})
-      this.player.match = item.key
-      this.player.player2 = Object.assign({}, this.players.player2, players[1], {points: 0})
-      this.setRecordModal = true
+      if (act === 'Todo') {
+        this.player.player1 = Object.assign({}, this.players.player1, players[0], {points: 0})
+        this.player.match = item.key
+        this.player.player2 = Object.assign({}, this.players.player2, players[1], {points: 0})
+        this.setRecordModal = true
+      } else if (act === 'Done') {
+        const points1 = item.looser === players[0].uid ? item.points.pointsLosser : item.points.pointsWinner
+        const points2 = item.looser === players[1].uid ? item.points.pointsLosser : item.points.pointsWinner
+        this.player.player1 = Object.assign({}, this.players.player1, players[0], {points: points1})
+        this.player.match = item.key
+        this.player.player2 = Object.assign({}, this.players.player2, players[1], {points: points2})
+        this.setInfoModal = true
+      }
     },
     showInfoModal (item) {
       const players = item.key.split('_*_').map((e) => this.players.filter(p => p.uid === e)[0])
@@ -141,6 +159,8 @@ export default {
   },
   data () {
     return {
+      active: null,
+      keys: ['Todo', 'Done'],
       player: {
         valid: false,
         match: '',

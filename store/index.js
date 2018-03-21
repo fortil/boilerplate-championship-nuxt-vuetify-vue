@@ -8,7 +8,8 @@ export const state = () => ({
 })
 const mapPlayers = (p) => p ? Object.keys(p).map((e) => {
   const data = {
-    difPoints: p[e].points - p[e].pointsLost
+    difPoints: p[e].points - p[e].pointsLost,
+    totalPoints: p[e].playsWon * 3
   }
   return Object.assign({}, { uid: e }, p[e], data)
 }) : []
